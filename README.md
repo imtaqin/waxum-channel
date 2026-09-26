@@ -116,6 +116,26 @@ from an allowlisted number — the message shows up in your session as a
 `<channel source="waxum-channel" ...>` event, and Claude can reply with the
 `reply` tool.
 
+### Approving tool use from WhatsApp
+
+This channel relays permission prompts (`Bash`, `Write`, `Edit`, ...) to
+every allowlisted sender in parallel with the local terminal dialog. When
+Claude wants to run something that needs approval, each allowlisted number
+gets a WhatsApp message like:
+
+```
+🔐 Claude wants to run Bash: list files in the project
+ls -la
+
+Reply "yes abcde" or "no abcde"
+```
+
+Reply `yes abcde` or `no abcde` (case-insensitive) from any allowlisted
+number to approve or deny. Whichever side answers first — the terminal or
+WhatsApp — wins; the other is dropped. A reply that doesn't match the
+`yes/no <id>` format, or carries an id Claude Code didn't just issue, falls
+through as a normal chat message instead.
+
 ## Security notes
 
 - **Two independent gates, both required**: HMAC signature verification
@@ -129,12 +149,11 @@ from an allowlisted number — the message shows up in your session as a
 - Treat the message **text** as untrusted even from an allowlisted sender —
   it's still free-form input from outside your session, same as any other
   external content.
-- This server has no permission-relay support (approving `Bash`/`Write`/etc.
-  from WhatsApp) — that would mean anyone who can message an allowlisted
-  number's phone can approve tool use in your session. Left out
-  deliberately; see the
-  [channels reference](https://code.claude.com/docs/en/channels-reference)
-  if you want to add it yourself.
+- **Permission relay is on** for every allowlisted sender (see above) — this
+  means anyone who can message an allowlisted number's own phone (or anyone
+  who controls that number) can approve or deny tool use in your session.
+  Only allowlist numbers you'd trust with that. There's no separate,
+  narrower "read-only" allowlist tier.
 
 ## Development
 
